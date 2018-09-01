@@ -1,16 +1,7 @@
-# Copyright 2016 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Test forms and inputs on Google App Engine with Python.
+# Uses (limited) data validation to verify dates, but it 
+# is not complete.  Dates like "February 31" are still
+# treated as valid.
 
 import webapp2
 
@@ -54,7 +45,7 @@ def escape_html(s):
 	import cgi
 	return cgi.escape(s, quote=True)
 
-
+#Form HTML
 form = """
 	<form method="post">
 		Enter your birthdate below:
@@ -68,6 +59,7 @@ form = """
 	</form>
 """
 
+#Renders and handles main page and sanitises user HTML input
 class MainPage(webapp2.RequestHandler):		
     def get(self):
     	self.response.write(form % {"error" : "", "month" : "", "day" : "", "year" : ""})
@@ -81,6 +73,8 @@ class MainPage(webapp2.RequestHandler):
     	day = valid_day(user_day)
     	year = valid_year(user_year)
     	
+        # If any single part of the date is considered invalid, prompt
+        # user to input date again.
     	if not (month and day and year):
     		self.response.write(form % {"error" : "Invalid entry. Try again.", 
     		"month" : escape_html(user_month), 
@@ -89,6 +83,8 @@ class MainPage(webapp2.RequestHandler):
     	else:
 			self.redirect("/confirm")
 
+# Renders confirmation page.  User is redirected here if
+# date is deemed valid.
 class ConfirmPage(webapp2.RequestHandler):	
 	def get(self):
 		self.response.write('Your birthdate has been verified.')
